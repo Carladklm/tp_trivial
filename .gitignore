@@ -1,0 +1,18 @@
+.venv/
+venv/
+
+# Fichiers compilés Python
+__pycache__/
+*.py[cod]
+
+# Variables d'environnement / secrets
+.env
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
