@@ -10,12 +10,14 @@ OUTPUT = Path("bronze/questions_raw.csv")
 PAUSE = 5.5 # On peut faire un appel que toutes les 5 secondes
 
 
-# 1. On récupere le TOKEN -----------------------------
+# 1. On récupere le TOKEN --------------------------------------------------------------------------------------------------------------------------------
 
 reponse_token = requests.get(TOKEN_URL, params={"command": "request"}) 
 donnees_token = reponse_token.json()
 token = donnees_token["token"]   
 
+
+# 2. On récupere les questionss --------------------------------------------------------------------------------------------------------------------------
 
 questions = []
 amount = 50
@@ -27,17 +29,19 @@ while True:
 
     if code == 0:
         questions.extend(data["results"])
-        print(f"{len(questions)} questions récupérées")
-    elif code == 1:
+        print(f"{len(questions)} questions récupérées (lot de {amount})")
+    elif code in (1, 4):
         if amount == 1:
-            break
-        amount = max(1, amount // 2)
-    elif code == 4:
-        break
+            break                     
+        amount = max(1, amount // 2) 
+        print(f"Plus assez de questions, on passe à des lots de {amount}")
     elif code == 5:
         time.sleep(PAUSE)
     else:
         raise RuntimeError(f"Erreur de l api : {code}")
+
+
+# 3. On sauvegarde les données dans bronze, un seul fichier ----------------------------------------------------------------------------------------------
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
