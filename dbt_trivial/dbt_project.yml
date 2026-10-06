@@ -1,0 +1,19 @@
+name: 'trivial'
+version: '1.0.0'
+profile: 'trivial'
+
+model-paths: ['models']
+seed-paths: ['seeds']
+macro-paths: ['macros']
+
+models:
+  trivial:
+    staging:
+      +materialized: view
+      +schema: silver
+    intermediate:
+      +materialized: view
+      +schema: silver
+    marts:
+      +materialized: table
+      +schema: gold

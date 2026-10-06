@@ -16,3 +16,6 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+data/trivial.duckdb
+dbt_trivial/target/
+dbt_trivial/logs/
