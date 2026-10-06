@@ -1,0 +1,10 @@
+pandas
+pyarrow
+tqdm
+polars
+glob2
+ujson
+orjson
+dbt-duckdb
+streamlit
+python-dotenv
