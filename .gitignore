@@ -16,3 +16,10 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+
+# dbt / DuckDB (générés)
+target/
+logs/
+dbt_packages/
+warehouse/
+*.duckdb

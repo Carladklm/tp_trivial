@@ -1,0 +1,49 @@
+run_order,run_id,model_key,lmstudio_id,model_name,publisher,country,params_b,disable_thinking,prompt_version,label_style,prompt_description,system_prompt,user_template,temperature,max_tokens,n_questions,sample_seed
+1,gemma3_1b__v1_letters,gemma3_1b,google/gemma-3-1b,Gemma 3 1B,Google,États-Unis,1.0,false,v1_letters,letters,"Options A/B/C/D, réponse par une lettre (A/B pour Vrai/Faux). Prompt de référence.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+2,gemma3_1b__v2_numbers,gemma3_1b,google/gemma-3-1b,Gemma 3 1B,Google,États-Unis,1.0,false,v2_numbers,numbers,"Options 1/2/3/4, réponse par un chiffre (1/2 pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. The options are labelled with numbers. If the question has four options, reply with only one number: 1, 2, 3 or 4. If it is a true/false question, reply with only 1 or 2. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+3,gemma3_1b__v3_text,gemma3_1b,google/gemma-3-1b,Gemma 3 1B,Google,États-Unis,1.0,false,v3_text,text,"Options sans étiquette, réponse = texte exact de l'option (True/False pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. Reply with only the correct answer, copied exactly as written in the list of options. If it is a true/false question, reply with only True or False. Do not write a sentence and do not explain.","Question: {question}
+{options}
+Answer:",0.0,40,1000,42
+4,gemma3_1b__v4_letters_hot,gemma3_1b,google/gemma-3-1b,Gemma 3 1B,Google,États-Unis,1.0,false,v4_letters_hot,letters,"Identique à v1_letters, seule la température change (1.0 au lieu de 0) : effet de l'aléatoire.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",1.0,5,1000,42
+5,lfm2_1_2b__v1_letters,lfm2_1_2b,liquid/lfm2-1.2b,LFM2 1.2B,Liquid AI,États-Unis,1.2,false,v1_letters,letters,"Options A/B/C/D, réponse par une lettre (A/B pour Vrai/Faux). Prompt de référence.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+6,lfm2_1_2b__v2_numbers,lfm2_1_2b,liquid/lfm2-1.2b,LFM2 1.2B,Liquid AI,États-Unis,1.2,false,v2_numbers,numbers,"Options 1/2/3/4, réponse par un chiffre (1/2 pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. The options are labelled with numbers. If the question has four options, reply with only one number: 1, 2, 3 or 4. If it is a true/false question, reply with only 1 or 2. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+7,lfm2_1_2b__v3_text,lfm2_1_2b,liquid/lfm2-1.2b,LFM2 1.2B,Liquid AI,États-Unis,1.2,false,v3_text,text,"Options sans étiquette, réponse = texte exact de l'option (True/False pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. Reply with only the correct answer, copied exactly as written in the list of options. If it is a true/false question, reply with only True or False. Do not write a sentence and do not explain.","Question: {question}
+{options}
+Answer:",0.0,40,1000,42
+8,lfm2_1_2b__v4_letters_hot,lfm2_1_2b,liquid/lfm2-1.2b,LFM2 1.2B,Liquid AI,États-Unis,1.2,false,v4_letters_hot,letters,"Identique à v1_letters, seule la température change (1.0 au lieu de 0) : effet de l'aléatoire.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",1.0,5,1000,42
+9,qwen2_5_3b__v1_letters,qwen2_5_3b,qwen2.5-3b-instruct,Qwen2.5 3B Instruct,Alibaba,Chine,3.0,false,v1_letters,letters,"Options A/B/C/D, réponse par une lettre (A/B pour Vrai/Faux). Prompt de référence.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+10,qwen2_5_3b__v2_numbers,qwen2_5_3b,qwen2.5-3b-instruct,Qwen2.5 3B Instruct,Alibaba,Chine,3.0,false,v2_numbers,numbers,"Options 1/2/3/4, réponse par un chiffre (1/2 pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. The options are labelled with numbers. If the question has four options, reply with only one number: 1, 2, 3 or 4. If it is a true/false question, reply with only 1 or 2. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+11,qwen2_5_3b__v3_text,qwen2_5_3b,qwen2.5-3b-instruct,Qwen2.5 3B Instruct,Alibaba,Chine,3.0,false,v3_text,text,"Options sans étiquette, réponse = texte exact de l'option (True/False pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. Reply with only the correct answer, copied exactly as written in the list of options. If it is a true/false question, reply with only True or False. Do not write a sentence and do not explain.","Question: {question}
+{options}
+Answer:",0.0,40,1000,42
+12,qwen2_5_3b__v4_letters_hot,qwen2_5_3b,qwen2.5-3b-instruct,Qwen2.5 3B Instruct,Alibaba,Chine,3.0,false,v4_letters_hot,letters,"Identique à v1_letters, seule la température change (1.0 au lieu de 0) : effet de l'aléatoire.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",1.0,5,1000,42
+13,ministral3_8b__v1_letters,ministral3_8b,ministral-3-8b-instruct-2512,Ministral 3 8B Instruct,Mistral AI,France,8.0,false,v1_letters,letters,"Options A/B/C/D, réponse par une lettre (A/B pour Vrai/Faux). Prompt de référence.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+14,ministral3_8b__v2_numbers,ministral3_8b,ministral-3-8b-instruct-2512,Ministral 3 8B Instruct,Mistral AI,France,8.0,false,v2_numbers,numbers,"Options 1/2/3/4, réponse par un chiffre (1/2 pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. The options are labelled with numbers. If the question has four options, reply with only one number: 1, 2, 3 or 4. If it is a true/false question, reply with only 1 or 2. Do not write anything else.","Question: {question}
+{options}
+Answer:",0.0,5,1000,42
+15,ministral3_8b__v3_text,ministral3_8b,ministral-3-8b-instruct-2512,Ministral 3 8B Instruct,Mistral AI,France,8.0,false,v3_text,text,"Options sans étiquette, réponse = texte exact de l'option (True/False pour Vrai/Faux).","You are a trivia expert answering general knowledge quiz questions. Reply with only the correct answer, copied exactly as written in the list of options. If it is a true/false question, reply with only True or False. Do not write a sentence and do not explain.","Question: {question}
+{options}
+Answer:",0.0,40,1000,42
+16,ministral3_8b__v4_letters_hot,ministral3_8b,ministral-3-8b-instruct-2512,Ministral 3 8B Instruct,Mistral AI,France,8.0,false,v4_letters_hot,letters,"Identique à v1_letters, seule la température change (1.0 au lieu de 0) : effet de l'aléatoire.","You are a trivia expert answering general knowledge quiz questions. The options are labelled with letters. If the question has four options, reply with only one letter: A, B, C or D. If it is a true/false question, reply with only A or B. Do not write anything else.","Question: {question}
+{options}
+Answer:",1.0,5,1000,42

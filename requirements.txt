@@ -8,3 +8,4 @@ orjson
 dbt-duckdb
 streamlit
 python-dotenv
+lmstudio
