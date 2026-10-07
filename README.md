@@ -4,7 +4,7 @@ Ce projet mesure à quel point de petits modèles de langage, exécutés en loca
 
 **En chiffres** : 5 296 questions × 4 modèles × 4 prompts = **84 736 réponses**.
 
-![Architecture médaillon du projet : sources, bronze, silver, gold et restitution](docs/architecture.png)
+![Architecture médaillon du projet : sources, bronze, silver, gold et restitution](docs/architecture_medaillon.png)
 
 ---
 
