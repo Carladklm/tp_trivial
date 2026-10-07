@@ -17,7 +17,7 @@ N_BENCHMARK = 1000            # questions par exécution dans le vrai benchmark 
 
 # --- Chemins et connexion -------------------------------------------------------------------------
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CONFIG_FILE = ROOT / "prompt" / "benchmark_config.csv"
 QUESTIONS_FILE = ROOT / "silver" / "questions_clean.parquet"
 

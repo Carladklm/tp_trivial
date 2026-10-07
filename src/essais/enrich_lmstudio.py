@@ -17,7 +17,7 @@ MAX_TOKENS = 50
 TIMEOUT = 120                                   
 BATCH_SIZE = 100                                
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT = ROOT / "silver" / "questions_clean.parquet"
 PROMPTS_FILE = ROOT / "prompt" / "prompts.csv"
 OUTPUT_DIR = ROOT / "silver" / "ai_responses.parquet"

@@ -6,6 +6,7 @@ glob2
 ujson
 orjson
 dbt-duckdb
+requests
 streamlit
 python-dotenv
 lmstudio
