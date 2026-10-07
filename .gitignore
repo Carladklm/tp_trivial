@@ -22,4 +22,10 @@ target/
 logs/
 dbt_packages/
 warehouse/
+.user.yml
 *.duckdb
+data_test/
+.streamlit/secrets.toml
+.pytest_cache/
+*.log
+.claude/

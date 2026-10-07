@@ -4,6 +4,8 @@ Ce projet mesure à quel point de petits modèles de langage, exécutés en loca
 
 **En chiffres** : 5 296 questions × 4 modèles × 4 prompts = **84 736 réponses**.
 
+![Architecture médaillon du projet : sources, bronze, silver, gold et restitution](docs/architecture.png)
+
 ---
 
 ## Sommaire
@@ -11,12 +13,11 @@ Ce projet mesure à quel point de petits modèles de langage, exécutés en loca
 1. [Résultats clés](#1-résultats-clés)
 2. [Méthodologie](#2-méthodologie)
 3. [Organisation du projet](#3-organisation-du-projet)
-4. [Setup complet](#4-setup-complet)
-5. [Lancer le pipeline](#5-lancer-le-pipeline)
-6. [Modèles dbt](#6-modèles-dbt)
-7. [Macros dbt](#7-macros-dbt)
-8. [Dashboard Streamlit](#8-dashboard-streamlit)
-9. [Limites](#9-limites)
+4. [Utilisation du projet](#4-utilisation-du-projet)
+5. [Modèles dbt](#5-modèles-dbt)
+6. [Macros dbt](#6-macros-dbt)
+7. [Dashboard Streamlit](#7-dashboard-streamlit)
+8. [Limites](#8-limites)
 
 ---
 
@@ -151,7 +152,6 @@ Les marts calculent ensuite trois indicateurs :
 │   ├── pages/                   ← 8 pages d'analyse
 │   └── lib/                     ← accès aux données, graphiques, style
 ├── .streamlit/config.toml       ← thème du dashboard
-├── tests/test_app.py            ← test de chargement du dashboard
 ├── docs/STREAMLIT_SPEC.md       ← cahier des charges du dashboard
 ├── dbt_project.yml
 ├── profiles.yml                 ← connexion dbt → warehouse/trivial_questions.duckdb
@@ -162,7 +162,22 @@ Les marts calculent ensuite trois indicateurs :
 
 ---
 
-## 4. Setup complet
+## 4. Utilisation du projet
+
+Cette partie suit l'ordre réel d'utilisation : on installe le projet, on lance le pipeline, puis on ouvre le dashboard.
+
+```
+Étape 1  Installer          venv + requirements.txt
+Étape 2  Préparer           LM Studio (serveur + 4 modèles), vérifier dbt
+Étape 3  Lancer             python src/main.py
+           ├─ 1/4 Collecte      API OpenTDB      → bronze/questions_raw.csv
+           ├─ 2/4 Nettoyage     bronze           → silver/questions_clean.parquet
+           ├─ 3/4 Réponses IA   LM Studio        → silver/ai_responses/part_*.parquet
+           └─ 4/4 dbt build     silver           → warehouse/ (schémas silver et gold)
+Étape 4  Explorer           Streamlit s'ouvre sur http://localhost:8501
+```
+
+Tu peux aussi **sauter les étapes 2 et 3** : les données `bronze/` et `silver/` sont versionnées, donc `dbt build` puis Streamlit suffisent pour explorer les résultats (§ 4.6).
 
 ### 4.1 Prérequis
 
@@ -170,7 +185,7 @@ Les marts calculent ensuite trois indicateurs :
 - **[LM Studio](https://lmstudio.ai/)**, uniquement pour l'étape « réponses des IA ».
 - Git.
 
-### 4.2 Installation
+### 4.2 Étape 1 : installer
 
 ```powershell
 git clone https://github.com/Carladklm/tp_trivial.git
@@ -183,50 +198,55 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-`requirements.txt` installe pandas, pyarrow, requests, dbt-duckdb (qui inclut DuckDB), streamlit et lmstudio.
+`requirements.txt` installe pandas, pyarrow, requests, dbt-duckdb (qui inclut DuckDB), streamlit et lmstudio. Toutes les commandes qui suivent se lancent **depuis la racine du projet, avec le venv activé**.
 
-### 4.3 Préparer LM Studio
+### 4.3 Étape 2 : préparer LM Studio et dbt
 
-1. Télécharge les 4 modèles du tableau du § 2.4.
+1. Dans LM Studio, télécharge les 4 modèles du tableau du § 2.4.
 2. Dans l'onglet **Developer**, démarre le serveur sur `localhost:1234`.
-3. Vérifie les noms avec `lms ls` : ils doivent être **exactement** ceux de la colonne `lmstudio_id` de `benchmark_config.csv`.
-
-Le script charge et décharge lui-même les modèles, un à la fois, pour libérer la mémoire.
-
-### 4.4 Vérifier dbt
+3. Vérifie les noms avec `lms ls` : ils doivent être **exactement** ceux de la colonne `lmstudio_id` de `prompt/benchmark_config.csv`. Le script charge et décharge lui-même les modèles, un à la fois.
+4. Vérifie que dbt trouve sa configuration :
 
 ```powershell
 dbt debug
 ```
 
-Lance cette commande depuis la racine du projet. dbt y trouve `profiles.yml`, et les sources lisent `silver/...` en chemin relatif.
+dbt lit `profiles.yml` à la racine, et ses sources lisent `silver/...` en chemin relatif : c'est pour ça qu'il faut être à la racine.
 
----
-
-## 5. Lancer le pipeline
-
-### 5.1 Tout le pipeline en une commande
+### 4.4 Étape 3 : lancer le pipeline
 
 ```powershell
 python src/main.py
 ```
 
-`main.py` enchaîne 4 étapes. Si l'une échoue, les suivantes ne sont pas lancées.
+`main.py` affiche d'abord les paramètres utilisés, puis enchaîne 4 étapes. **Si l'une échoue, les suivantes ne sont pas lancées.**
 
-| Étape | Ce qu'elle fait | Durée indicative |
-|---|---|---|
-| 1. Collecte | API OpenTDB → `bronze/questions_raw.csv` (**écrasé**) | ~10 min pour toutes les questions |
-| 2. Nettoyage | bronze → `silver/questions_clean.parquet`, avec contrôles | quelques secondes |
-| 3. Réponses des IA | LM Studio → `silver/ai_responses/part_*.parquet` | ~45 min pour les 16 exécutions (sur GPU) |
-| 4. dbt build | staging → intermediate → marts dans `warehouse/` | quelques secondes |
+| Étape | Ce qu'elle fait | Ce que tu vois dans le terminal | Durée indicative |
+|---|---|---|---|
+| 1. Collecte | Interroge l'API OpenTDB et **écrase** `bronze/questions_raw.csv` | `50 questions récupérées (lot de 50)`… puis `N questions enregistrées` | ~10 min pour toutes les questions |
+| 2. Nettoyage | Contrôle, nettoie et déduplique, puis écrit `silver/questions_clean.parquet` | Les contrôles, un par ligne, en `OK` (un seul `KO` arrête tout) | quelques secondes |
+| 3. Réponses des IA | Pose chaque question à chaque modèle et écrit `silver/ai_responses/part_*.parquet` | `Modèle prêt`, l'avancement toutes les 50 questions, puis un tableau `BILAN` | ~45 min pour les 16 exécutions (sur GPU) |
+| 4. dbt build | Construit les 13 modèles : staging → intermediate → marts | `13 of 13 OK`, puis `Completed successfully` | quelques secondes |
 
-À la fin, `main.py` **lance le dashboard Streamlit et affiche son lien** (`http://localhost:8501`, ou le port libre suivant). Ctrl+C l'arrête.
+Exemple de fin de l'étape 3, puis de l'étape 4, sur un test avec 20 questions :
 
-### 5.2 Paramètres
+```
+BILAN
+               run_id   statut  nouvelles bonnes réponses (provisoire) format valide   durée
+gemma3_1b__v1_letters terminée         20                        10.0%        100.0% 0.2 min
+...
+Done. PASS=13 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=13
 
-Les paramètres se règlent en haut de `src/main.py` ou en ligne de commande. La ligne de commande est prioritaire.
+Pipeline terminé en 1.3 min.
+```
 
-| Option | Variable | Défaut | Rôle |
+L'étape 3 est **reprenable** : si elle est interrompue (Ctrl+C, LM Studio coupé), relance simplement `main.py`. Les questions déjà traitées sont sautées.
+
+### 4.5 Paramètres du lancement
+
+Les paramètres se règlent en haut de `src/main.py`, ou en ligne de commande, qui est prioritaire.
+
+| Option | Variable dans `main.py` | Défaut | Rôle |
 |---|---|---|---|
 | `--n-questions-api` | `N_QUESTIONS_API` | toutes | nombre de questions à récolter |
 | `--run-orders` | `RUN_ORDERS` | toutes | lignes de `benchmark_config.csv` à exécuter, ex. `1 2 3` |
@@ -236,27 +256,46 @@ Les paramètres se règlent en haut de `src/main.py` ou en ligne de commande. La
 
 Dans le fichier, `RUN_ORDERS` doit être une **liste**, par exemple `[1]` et non `1`.
 
-Exemple de test rapide (environ 1 minute) :
+Exemple de test rapide, environ 1 minute (1 modèle, 20 questions) :
 
 ```powershell
 python src/main.py --n-questions-api 200 --run-orders 1 --n-questions-ia 20 --batch-size 20
 ```
 
-⚠️ Ce test écrase `bronze/` et `silver/questions_clean.parquet`. Lance-le plutôt dans une copie du projet. Vide aussi `silver/ai_responses/` dans cette copie, sinon les questions déjà traitées sont sautées.
+⚠️ Ce test écrase `bronze/` et `silver/questions_clean.parquet`. Lance-le plutôt dans une copie du projet, et vide `silver/ai_responses/` dans cette copie, sinon les questions déjà traitées sont sautées.
 
-### 5.3 Lancer une étape seule
+### 4.6 Étape 4 : explorer les résultats dans Streamlit
 
-```powershell
-dbt build                                  # reconstruire silver/gold à partir des Parquet existants
-streamlit run app/streamlit_app.py         # ouvrir le dashboard
-pip install pytest; pytest tests/          # vérifier que le dashboard se charge
+**Après `main.py`**, le dashboard se lance tout seul. Le terminal affiche :
+
+```
+====================================================================================================
+Dashboard Streamlit : http://localhost:8501
+Ctrl+C pour arrêter l'app.
+====================================================================================================
 ```
 
-Pour explorer les résultats **sans relancer l'API ni les modèles** : après un clone, `dbt build` puis `streamlit run app/streamlit_app.py` suffisent, puisque `bronze/` et `silver/` sont versionnés.
+Le navigateur s'ouvre en général tout seul ; sinon, ouvre le lien affiché. Si le port 8501 est déjà pris, le suivant libre est utilisé (8502, 8503…), et c'est ce lien qui est affiché.
+
+**Sans relancer le pipeline**, par exemple juste après un clone :
+
+```powershell
+dbt build                                  # construit warehouse/ à partir des Parquet versionnés
+streamlit run app/streamlit_app.py         # ouvre le dashboard
+```
+
+**Dans le dashboard :**
+
+1. La **page d'accueil** affiche le classement général. Une phrase de synthèse résume le résultat : meilleur modèle, et si son écart avec le 2e est significatif.
+2. La **barre latérale** donne accès aux 8 pages d'analyse (Modèles, Formats de prompt, Température, Catégories, Difficulté, Biais de position, Questions pièges, Méthodologie) et aux filtres de la page : prompt, modèles, etc.
+3. **Survole un graphique** pour lire les valeurs exactes, l'intervalle de confiance et l'effectif `n`. Sous chaque graphique, une phrase explique comment le lire.
+4. Après un nouveau `dbt build`, clique sur **« Recharger les données »** dans la barre latérale pour voir les nouveaux résultats sans redémarrer l'app.
+
+Pour arrêter le dashboard : **Ctrl+C** dans le terminal.
 
 ---
 
-## 6. Modèles dbt
+## 5. Modèles dbt
 
 Configuration (`dbt_project.yml`) : les modèles sont dans `src/models`. Le staging est matérialisé en **vues**, l'intermédiaire et les marts en **tables**. Les schémas `silver` et `gold` vivent dans `warehouse/trivial_questions.duckdb`.
 
@@ -290,7 +329,7 @@ Le jeu contient 24 catégories, regroupées en 12 groupes. Il compte 4 507 QCM e
 
 ---
 
-## 7. Macros dbt
+## 6. Macros dbt
 
 | Macro | Utilisée dans | Ce qu'elle fait | Pourquoi |
 |---|---|---|---|
@@ -301,7 +340,7 @@ Le jeu contient 24 catégories, regroupées en 12 groupes. Il compte 4 507 QCM e
 
 ---
 
-## 8. Dashboard Streamlit
+## 7. Dashboard Streamlit
 
 Lancement : `streamlit run app/streamlit_app.py`. Le dashboard s'ouvre aussi automatiquement à la fin de `src/main.py`.
 
@@ -326,7 +365,7 @@ Chaque page commence par une synthèse calculée à partir des données. Chaque 
 
 ---
 
-## 9. Limites
+## 8. Limites
 
 - **Contamination possible** : les questions OpenTDB sont publiques et ont pu servir à l'entraînement des modèles.
 - **Questions en anglais** uniquement.
