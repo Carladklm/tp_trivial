@@ -20,3 +20,10 @@ data/trivial.duckdb
 dbt_trivial/target/
 dbt_trivial/logs/
 dbt_trivial/.user.yml
+
+# dbt / DuckDB (générés)
+target/
+logs/
+dbt_packages/
+warehouse/
+*.duckdb

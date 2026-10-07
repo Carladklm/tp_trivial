@@ -1,0 +1,17 @@
+name: 'trivial_questions'
+version: '1.0.0'
+profile: 'trivial_questions'
+
+model-paths: ['src/models']
+
+models:
+  trivial_questions:
+    staging:
+      +materialized: view
+
+    intermediate:
+      +materialized: table
+
+    marts:
+      +materialized: table
+      +schema: gold

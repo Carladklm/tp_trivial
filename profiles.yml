@@ -1,0 +1,7 @@
+trivial_questions:
+  target: dev
+
+  outputs:
+    dev:
+      type: duckdb
+      path: warehouse/trivial_questions.duckdb
