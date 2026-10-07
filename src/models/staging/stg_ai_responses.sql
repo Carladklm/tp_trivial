@@ -1,49 +1,39 @@
-with source as (
-    select * from {{ source('silver_files', 'ai_responses') }}
+WITH source AS (
+    SELECT * FROM {{ source('silver', 'ai_responses') }}
 ),
 
-renamed as (
-
-    select
-        -- exécution (modèle + prompt + paramètres)
+renamed AS (
+    SELECT
         run_id,
-        cast(run_order as integer)            as run_order,
+        CAST(run_order AS integer) AS run_order,
         model_key,
         lmstudio_id,
         model_name,
-        publisher                             as model_publisher,
-        country                               as model_country,
-        cast(params_b as double)              as model_params_b,
+        publisher AS model_publisher,
+        country AS model_country,
+        CAST(params_b AS double) AS model_params_b,
         prompt_version,
-        label_style,                                                -- 'letters', 'numbers', 'text'
-        cast(temperature as double)           as temperature,
-        cast(max_tokens as integer)           as max_tokens,
-        cast(sample_seed as integer)          as sample_seed,
-        cast(sample_rank as integer)          as sample_rank,
-
-        -- question posée
-        -- (les autres attributs : type, difficulté, catégorie... viennent de stg_questions,
-        --  la source de vérité, via une jointure sur question_id en intermediate)
+        label_style,                                               
+        CAST(temperature AS double) AS temperature,
+        CAST(max_tokens AS integer) AS max_tokens,
+        CAST(sample_seed AS integer) AS sample_seed,
+        CAST(sample_rank AS integer) AS sample_rank,
         question_id,
-        choices,                                                    -- options dans l'ordre présenté
+        choices,                                                    
         correct_answer,
-        correct_label,                                              -- 'C', '3' ou le texte
-
-        -- prompt envoyé
+        correct_label,                                              
         system_prompt,
         user_prompt,
-
-        -- réponse brute et mesures de l'appel
         raw_response,
-        cast(response_time as double)         as response_time_s,
-        cast(time_to_first_token as double)   as time_to_first_token_s,
-        cast(prompt_tokens as integer)        as prompt_tokens,
-        cast(completion_tokens as integer)    as completion_tokens,
+        CAST(response_time AS double) AS response_time_s,
+        CAST(time_to_first_token AS double) AS time_to_first_token_s,
+        CAST(prompt_tokens AS integer) AS prompt_tokens,
+        CAST(completion_tokens AS integer) AS completion_tokens,
         stop_reason,
-        cast(created_at as timestamp)         as created_at
+        CAST(created_at AS timestamp) AS created_at
 
-    from source
+    FROM source
 
 )
 
-select * from renamed
+SELECT * FROM renamed

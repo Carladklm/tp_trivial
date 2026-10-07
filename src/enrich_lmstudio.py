@@ -1,18 +1,3 @@
-"""
-Enrichissement Silver : pose chaque question à un LLM local (LM Studio)
-et écrit les réponses dans data/silver/ai_responses/part_XXXX.parquet.
-
-1 ligne = 1 question x 1 modèle x 1 version de prompt.
-
-Le script est reprenable : au démarrage, il relit les fichiers déjà écrits
-et saute les couples (question_id, model, prompt_version) déjà traités.
-
-Exemples :
-    python src/enrich_lmstudio.py --limit 20
-    python src/enrich_lmstudio.py --prompts v2_strict v3_optimized --limit 200
-    python src/enrich_lmstudio.py --input silver/questions.parquet --limit 20
-"""
-
 import argparse
 import json
 import random
@@ -20,31 +5,28 @@ import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-
 import pandas as pd
 import requests
 
-# --------------------------------------------------------------------------
-# Configuration
-# --------------------------------------------------------------------------
-BASE_URL = "http://localhost:1234/v1"          # serveur local de LM Studio
-DEFAULT_MODEL = "llama-3.2-3b-instruct"         # mlx-community/Llama-3.2-3B-Instruct-4bit
-TEMPERATURE = 0                                 # réponses déterministes = benchmark reproductible
-MAX_TOKENS = 50                                 # assez pour une lettre, coupe les longs bavardages
-TIMEOUT = 120                                   # secondes max par appel
-BATCH_SIZE = 100                                # 1 fichier parquet tous les 100 résultats
+# 1. Parametre du modele et du prompt -----------------------------------------------------------------------------------------------
+
+BASE_URL = "http://localhost:1234/v1"          
+DEFAULT_MODEL = "llama-3.2-3b-instruct"         
+TEMPERATURE = 0                                 
+MAX_TOKENS = 50                                 
+TIMEOUT = 120                                   
+BATCH_SIZE = 100                                
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INPUT = ROOT / "data" / "silver" / "questions_clean.parquet"
-PROMPTS_FILE = ROOT / "dbt_trivial" / "seeds" / "prompts.csv"
-OUTPUT_DIR = ROOT / "data" / "silver" / "ai_responses"
+DEFAULT_INPUT = ROOT / "silver" / "questions_clean.parquet"
+PROMPTS_FILE = ROOT / "prompt" / "prompts.csv"
+OUTPUT_DIR = ROOT / "silver" / "ai_responses.parquet"
 
 LETTERS = "ABCD"
 
 
-# --------------------------------------------------------------------------
-# Préparation des questions et des prompts
-# --------------------------------------------------------------------------
+# 2. Préparation des questions et des prompts --------------------------------------------------------------------------------------
+
 def load_prompts(path: Path) -> dict:
     """Lit seeds/prompts.csv. Les retours à la ligne y sont écrits '\\n'."""
     df = pd.read_csv(path, keep_default_na=False, dtype=str)

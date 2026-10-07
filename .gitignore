@@ -31,3 +31,4 @@ warehouse/*.duckdb
 target/
 logs/
 .user.yml
+backup/
