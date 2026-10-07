@@ -86,14 +86,35 @@ with cols[3]:
     compared = f"{len(ranking)} exécutions comparées" if all_prompts else f"{len(ranking)} modèles comparés"
     kpi("Questions par modèle", questions_per_model(), "pink", delta=compared)
 
+# --- Synthèse ------------------------------------------------------------------
+summary = f"**{best[label]}** arrive en tête avec **{fmt_pct(best['accuracy'])}** de bonnes réponses."
+if second is not None:
+    overlap = best["accuracy_ci_low"] <= second["accuracy_ci_high"]
+    summary += (
+        f" Son intervalle de confiance chevauche celui de {second[label]} ({fmt_pct(second['accuracy'])}) : "
+        "**l'écart n'est pas significatif**."
+        if overlap
+        else f" Son intervalle de confiance ne chevauche pas celui de {second[label]} ({fmt_pct(second['accuracy'])}) : "
+        "**l'écart est significatif**."
+    )
+st.markdown(summary)
+
 # --- Graphiques principaux ---------------------------------------------------
 section("Précision et nature des erreurs")
 left, right = st.columns([3, 2], gap="large")
 with left:
     charts.show(charts.accuracy_bars(ranking, f"Précision — {prompt_label(prompt)}", label=label))
+    st.caption(
+        "Chaque barre est la part de bonnes réponses ; le trait blanc est l'intervalle de confiance à 95 % "
+        "et la ligne pointillée le score qu'on obtiendrait en répondant au hasard."
+    )
 with right:
     charts.show(
         charts.status_stack(ranking, "Juste, faux ou format invalide", order=ranking[label].tolist(), label=label)
+    )
+    st.caption(
+        "Une partie grise importante signifie que le modèle perd des points parce qu'il ne respecte pas le format "
+        "demandé, et non parce qu'il ignore la réponse."
     )
 
 # --- Vue d'ensemble des 16 exécutions ----------------------------------------
@@ -120,6 +141,10 @@ charts.show(
             alt.Tooltip("sample_note:N", title="Effectif"),
         ],
     )
+)
+st.caption(
+    "Une ligne par modèle, une colonne par prompt : plus la case est foncée, plus la précision est élevée. "
+    "La dernière colonne (température 1) ne sert qu'à mesurer l'effet de l'aléatoire."
 )
 
 # --- Tableau détaillé ----------------------------------------------------------

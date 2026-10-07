@@ -99,6 +99,22 @@ def load_question_insights() -> pd.DataFrame:
     return load_mart("mart_question_insights")
 
 
+def load_volumes() -> pd.Series:
+    """Volumes réels du benchmark : réponses, questions, modèles et prompts."""
+    load_mart("mart_leaderboard")
+    load_mart("mart_question_insights")
+    return query(
+        f"""
+        select
+            (select sum(n_questions) from {SCHEMA}.mart_leaderboard) as n_responses,
+            (select count(*) from {SCHEMA}.mart_question_insights) as n_questions,
+            (select count(distinct model_key) from {SCHEMA}.mart_leaderboard) as n_models,
+            (select count(distinct prompt_version) from {SCHEMA}.mart_leaderboard) as n_prompts,
+            (select count(*) from {SCHEMA}.mart_leaderboard) as n_runs
+        """
+    ).iloc[0]
+
+
 def reload_button() -> None:
     """Bouton de barre latérale qui vide le cache pour relire la base après un `dbt build`."""
     if st.sidebar.button("Recharger les données", width="stretch"):

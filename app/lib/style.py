@@ -80,9 +80,27 @@ DEFAULT_PROMPT = "v1_letters"
 ALL_PROMPTS = "all"
 
 DIFFICULTY_LABELS = {"easy": "Facile", "medium": "Moyen", "hard": "Difficile", "all": "Toutes"}
+DIFFICULTY_ORDER = ["easy", "medium", "hard"]
 QUESTION_TYPE_LABELS = {"multiple": "QCM", "boolean": "Vrai/Faux"}
+QUESTION_TYPE_ORDER = ["multiple", "boolean"]
+
+# Formats de réponse (label_style), dans l'ordre de lecture Lettres → Chiffres → Texte.
+FORMAT_LABELS = {"letters": "Lettres", "numbers": "Chiffres", "text": "Texte"}
+FORMAT_ORDER = list(FORMAT_LABELS)
+FORMAT_COLORS = {"letters": TRIVIAL["yellow"], "numbers": TRIVIAL["purple"], "text": ACCENT}
+
+DIFFICULTY_COLORS = {"easy": TRIVIAL["green"], "medium": TRIVIAL["yellow"], "hard": TRIVIAL["pink"]}
+
+GAIN_COLOR = TRIVIAL["green"]
+LOSS_COLOR = "#D55E00"
 
 SMALL_SAMPLE = 30
+
+CONFOUNDING_NOTE = (
+    "Avec 4 modèles, on **observe** sans pouvoir **généraliser** : chaque pays n'a qu'un modèle "
+    "(sauf les États-Unis, qui en ont deux), et le pays, l'éditeur et la taille ne peuvent pas "
+    "être séparés du modèle lui-même."
+)
 
 # Infobulles reprises des définitions de la page Méthodologie.
 HELP = {
@@ -93,7 +111,30 @@ HELP = {
     "random_baseline": "Score d'un modèle qui répondrait au hasard : 0,25 pour un QCM, 0,5 pour un vrai/faux.",
     "chance_corrected_score": "(précision − hasard) / (1 − hasard). 0 = hasard, 1 = parfait, négatif = pire que le hasard.",
     "correct_per_minute": "Bonnes réponses produites par minute de calcul : efficacité.",
+    "prompt_spread": "Écart de précision entre le meilleur et le pire prompt d'un modèle : plus il est faible, plus le modèle est robuste au format.",
+    "answer_stability": "Part des questions où le modèle donne la même réponse à T=0 et à T=1.",
+    "position_bias": "Part des réponses données sur une position, moins la part des bonnes réponses réellement sur cette position. > 0 : le modèle sur-choisit cette option.",
+    "ai_difficulty": "Difficulté « vécue » par les modèles : facile si au moins 2/3 des 12 réponses sont justes, difficile si moins d'1/3, sinon moyenne.",
+    "is_common_trap": "Aucun modèle n'a juste et au moins la moitié des réponses désignent la même mauvaise option (idée reçue, ou possible erreur du dataset).",
+    "is_majority_correct": "La réponse la plus donnée par l'ensemble des modèles est la bonne (vote à la majorité).",
 }
+
+# Tableau des définitions (page Méthodologie) : (indicateur, colonne, clé de HELP).
+DEFINITIONS = [
+    ("Précision", "accuracy", "accuracy"),
+    ("Intervalle de confiance", "accuracy_ci_low / accuracy_ci_high", "ci"),
+    ("Format valide", "valid_format_rate", "valid_format_rate"),
+    ("Précision si format valide", "accuracy_when_valid", "accuracy_when_valid"),
+    ("Hasard", "random_baseline", "random_baseline"),
+    ("Score corrigé du hasard", "chance_corrected_score", "chance_corrected_score"),
+    ("Bonnes réponses par minute", "correct_per_minute", "correct_per_minute"),
+    ("Robustesse au prompt", "prompt_spread", "prompt_spread"),
+    ("Stabilité des réponses", "answer_stability", "answer_stability"),
+    ("Biais de position", "position_bias", "position_bias"),
+    ("Difficulté vécue", "ai_difficulty", "ai_difficulty"),
+    ("Piège commun", "is_common_trap", "is_common_trap"),
+    ("Vote à la majorité", "is_majority_correct", "is_majority_correct"),
+]
 
 # ---------------------------------------------------------------------------
 # Formats
@@ -125,6 +166,27 @@ def prompt_label(prompt_version: str) -> str:
     if prompt_version == ALL_PROMPTS:
         return "Tous les prompts"
     return PROMPT_LABELS.get(prompt_version, prompt_version)
+
+
+def difficulty_label(difficulty: str) -> str:
+    """Libellé français d'une difficulté (Facile, Moyen, Difficile)."""
+    return DIFFICULTY_LABELS.get(difficulty, difficulty)
+
+
+def type_label(question_type: str) -> str:
+    """Libellé français d'un type de question (QCM, Vrai/Faux)."""
+    return QUESTION_TYPE_LABELS.get(question_type, question_type)
+
+
+def format_label(label_style: str) -> str:
+    """Libellé français d'un format de réponse (Lettres, Chiffres, Texte)."""
+    return FORMAT_LABELS.get(label_style, label_style)
+
+
+def ordered(values, order: list[str]) -> list[str]:
+    """Valeurs présentes, dans l'ordre de référence `order`, les inconnues en dernier."""
+    present = list(dict.fromkeys(values))
+    return [v for v in order if v in present] + sorted(v for v in present if v not in order)
 
 
 # ---------------------------------------------------------------------------
@@ -282,6 +344,26 @@ def model_filter(df: pd.DataFrame, key: str = "models") -> list[str]:
     key_by_name = df.drop_duplicates("model_name").set_index("model_name")["model_key"]
     chosen = st.sidebar.multiselect("Modèles", names, default=names, key=key)
     return [key_by_name[n] for n in chosen]
+
+
+def multi_filter(label: str, values, order: list[str] | None = None, format_func=str, key: str | None = None) -> list:
+    """Sélection multiple de barre latérale (tout coché par défaut) sur les valeurs présentes."""
+    options = ordered(values, order or [])
+    return st.sidebar.multiselect(label, options, default=options, format_func=format_func, key=key or label)
+
+
+def with_labels(df: pd.DataFrame) -> pd.DataFrame:
+    """Ajoute les colonnes de libellés français pour les dimensions présentes dans `df`."""
+    out = df.copy()
+    if "prompt_version" in out.columns:
+        out["prompt_label"] = out["prompt_version"].map(prompt_label)
+    if "difficulty" in out.columns:
+        out["difficulty_label"] = out["difficulty"].map(difficulty_label)
+    if "question_type" in out.columns:
+        out["type_label"] = out["question_type"].map(type_label)
+    if "label_style" in out.columns:
+        out["format_label"] = out["label_style"].map(format_label)
+    return out
 
 
 # ---------------------------------------------------------------------------

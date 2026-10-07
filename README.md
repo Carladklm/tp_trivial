@@ -147,7 +147,8 @@ Les marts calculent ensuite trois indicateurs :
 ├── silver/                      ← questions nettoyées + réponses des IA (Parquet)
 ├── warehouse/                   ← base DuckDB construite par dbt (non versionnée)
 ├── app/                         ← dashboard Streamlit
-│   ├── streamlit_app.py
+│   ├── streamlit_app.py         ← page d'accueil (classement général)
+│   ├── pages/                   ← 8 pages d'analyse
 │   └── lib/                     ← accès aux données, graphiques, style
 ├── .streamlit/config.toml       ← thème du dashboard
 ├── tests/test_app.py            ← test de chargement du dashboard
@@ -302,9 +303,25 @@ Le jeu contient 24 catégories, regroupées en 12 groupes. Il compte 4 507 QCM e
 
 ## 8. Dashboard Streamlit
 
-- **Point d'entrée** : `app/streamlit_app.py`, qui affiche le classement général à partir de `gold.mart_leaderboard`, avec des filtres par prompt et par modèle.
+Lancement : `streamlit run app/streamlit_app.py`. Le dashboard s'ouvre aussi automatiquement à la fin de `src/main.py`.
+
+| Page | Question posée | Table gold |
+|---|---|---|
+| Accueil | Quel modèle, avec quel prompt, répond le mieux ? | `mart_leaderboard` |
+| Modèles | Un modèle plus gros, ou d'un autre pays, fait-il mieux ? À quel coût en temps ? | `mart_model_profile` |
+| Formats de prompt | Lettre, chiffre ou texte : le format change-t-il le résultat ? | `mart_prompt_format` |
+| Température | L'aléatoire (T=1) fait-il perdre en précision et en régularité ? | `mart_temperature_effect` |
+| Catégories | Chaque modèle a-t-il des thèmes forts et faibles ? | `mart_perf_by_category` |
+| Difficulté | Comment la performance évolue-t-elle avec la difficulté, et par rapport au hasard ? | `mart_perf_by_difficulty` |
+| Biais de position | Les modèles préfèrent-ils certaines options (A, True) ? | `mart_position_bias` |
+| Questions pièges | Quelles questions font tomber tous les modèles ? La difficulté annoncée est-elle réaliste ? | `mart_question_insights` |
+| Méthodologie | Pipeline, protocole, règle de correction, définitions et limites | `mart_leaderboard`, `mart_question_insights` (volumes) |
+
+Chaque page commence par une synthèse calculée à partir des données. Chaque graphique est suivi d'une phrase qui explique comment le lire. Les précisions sont toujours affichées avec leur intervalle de confiance et le niveau du hasard.
+
 - **Lecture seule** : l'app ouvre et referme une connexion DuckDB à chaque requête. `dbt build` peut ainsi tourner pendant que le dashboard est ouvert. Le bouton « Recharger les données » affiche les nouveaux résultats.
-- **Aucun calcul métier dans l'app** : tous les indicateurs viennent des marts.
+- **Aucun calcul métier dans l'app** : tous les indicateurs viennent des marts. L'app se limite à filtrer, à faire des pivots d'affichage et à regrouper les catégories par famille (somme des bonnes réponses / somme des questions).
+- **Couleur fixe par modèle** sur toutes les pages (palette adaptée aux daltoniens).
 - Le cahier des charges complet se trouve dans [`docs/STREAMLIT_SPEC.md`](docs/STREAMLIT_SPEC.md).
 
 ---
