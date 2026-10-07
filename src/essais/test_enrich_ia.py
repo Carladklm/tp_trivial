@@ -16,7 +16,7 @@ N_QUESTIONS = 20       # nombre de questions tirées au hasard (20 pour tester, 
 
 # --- Chemins et connexion -------------------------------------------------------------------------
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CONFIG_FILE = ROOT / "prompt" / "benchmark_config.csv"
 QUESTIONS_FILE = ROOT / "silver" / "questions_clean.parquet"
 OUTPUT_DIR = ROOT / "silver" / "ai_responses"
