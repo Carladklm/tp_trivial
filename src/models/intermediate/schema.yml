@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: int_responses_enriched
+    description: "Réponses de l'IA interprétées, corrigées et enrichies avec les attributs des questions"
+    columns:
+      - name: question_type
+        description: "Toujours renseigné : chaque réponse retrouve sa question"
+        tests:
+          - not_null
+      - name: is_valid_format
+        tests:
+          - not_null
+      - name: ai_correct
+        tests:
+          - not_null
