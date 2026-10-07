@@ -14,10 +14,10 @@ DIFFICULTY_LEVEL = {"easy": 1, "medium": 2, "hard": 3}
 HTML_ENTITY = r"&[a-zA-Z#0-9]+;"
 
 
-# --- Outils ---------------------------------------------------------------------------------------
+# 1. Fonctions utilitaires ---------------------------------------------------------------------------------------
 
+# Permet de vérifier indiviuellement chaque contrôle et avoir le résultat
 def verifier(controles: dict, etape: str) -> None:
-    """Affiche chaque contrôle (OK / KO) et arrête le script si l'un d'eux échoue."""
     print(f"\n--- Contrôles : {etape}")
     for nom, ok in controles.items():
         print(("OK  " if ok else "KO  ") + nom)
@@ -25,17 +25,15 @@ def verifier(controles: dict, etape: str) -> None:
     if echecs:
         raise ValueError(f"{len(echecs)} contrôle(s) en échec ({etape}) : {echecs}")
 
-
+# Permet de nettoyer le texte des questions HTML > clean
 def clean_text(value: str) -> str:
-    """Décode le HTML, retire les caractères invisibles et les espaces en trop."""
     value = html.unescape(value)
-    value = value.replace("­", "")    # &shy; : césure invisible
-    value = value.replace(" ", " ")   # &nbsp; : espace insécable
-    return " ".join(value.split())         # espaces multiples + bords
+    value = value.replace("­", "")   
+    value = value.replace(" ", " ")   
+    return " ".join(value.split())         
 
-
+# Permet de créer un id pour chaque question, se base sur question + bonne réponse
 def make_id(question: str, correct_answer: str) -> str:
-    """Identifiant stable : hash MD5 de (question, bonne réponse) normalisées en minuscules."""
     key = f"{question.lower()}||{correct_answer.lower()}"
     return hashlib.md5(key.encode("utf-8")).hexdigest()[:12]
 

@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: silver
     tables:
-      - name: questions_cleaned
+      - name: questions_clean
         meta:
           external_location: "read_parquet('silver/questions_clean.parquet')"
 

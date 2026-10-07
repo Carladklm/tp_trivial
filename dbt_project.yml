@@ -3,14 +3,17 @@ version: '1.0.0'
 profile: 'trivial_questions'
 
 model-paths: ['src/models']
+macro-paths: ['src/macros']
 
 models:
   trivial_questions:
     staging:
       +materialized: view
+      +schema: silver
 
     intermediate:
       +materialized: table
+      +schema: silver
 
     marts:
       +materialized: table
