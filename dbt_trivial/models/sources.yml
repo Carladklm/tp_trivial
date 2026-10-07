@@ -1,8 +1,0 @@
-version: 2
-
-sources:
-  - name: silver
-    tables:
-      - name: ai_responses
-        meta:
-          external_location: "../data/silver/ai_responses/part_*.parquet"

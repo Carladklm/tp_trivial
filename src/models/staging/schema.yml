@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_questions
+    description: "1 ligne = 1 question nettoyée"
+    columns:
+      - name: question_id
+        tests:
+          - unique
+          - not_null
+      - name: question_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['multiple', 'boolean']
+      - name: difficulty
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['easy', 'medium', 'hard']
+
+  - name: stg_ai_responses
+    description: "1 ligne = 1 réponse d'un modèle à une question, pour un run (modèle x prompt)"
+    columns:
+      - name: run_id
+        tests:
+          - not_null
+      - name: question_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_questions')
+                field: question_id
